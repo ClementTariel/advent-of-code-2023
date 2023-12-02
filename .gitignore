@@ -20,5 +20,5 @@
 # Go workspace file
 go.work
 
-# Inputs
-*/input.txt
+# Inputs and session token
+*.txt
