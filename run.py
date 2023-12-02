@@ -26,7 +26,12 @@ if not lastDay > 0:
     exit()
 
 os.chdir(dayName)
-print(subprocess.run(["go build -buildmode=plugin " +dayName+".go"],shell=True))
+pluguinBuildResult = subprocess.run(["go build -buildmode=plugin " +dayName+".go"],shell=True,capture_output = True, text=True)
+print(pluguinBuildResult.stdout)
+if len(pluguinBuildResult.stderr) > 0:
+    print("error")
+    print(pluguinBuildResult.stderr)
+    exit()
 os.chdir("..")
 subprocess.run(["go run main.go "+dayName+"/"+dayName+".so"],shell=True)
 

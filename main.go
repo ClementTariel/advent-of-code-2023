@@ -11,10 +11,6 @@ import (
 	"plugin"
 )
 
-type Solver interface {
-	Resolve()
-}
-
 func getDays() ([]string, error) {
 	dir, err := os.Open("./")
 	if err != nil {
@@ -117,17 +113,22 @@ func main() {
 		panic(err)
 	}
 	
-	symSolver, err := p.Lookup("Solver")
+	f1, err := p.Lookup("Resolve1")
 	if err != nil {
 		panic(err)
 	}
-	var solver Solver
-	solver, ok := symSolver.(Solver)
-	if !ok {
-		panic("unexpected type from module symbol")
+
+	f2, err := p.Lookup("Resolve2")
+	if err != nil {
+		panic(err)
 	}
+
 	fmt.Println("\n==========\n")
-	solver.Resolve()
+	result1 := f1.(func(lines []string)(string))(lines)
+	fmt.Println("result 1 : '"+result1+"'")
+	fmt.Println("\n==========\n")
+	result2 := f2.(func(lines []string)(string))(lines)
+	fmt.Println("result 2 : '"+result2+"'")
 	fmt.Println("\n==========\n")
 	fmt.Println("End")
 }
