@@ -113,22 +113,32 @@ func main() {
 		panic(err)
 	}
 	
+	f1Exists := true
 	f1, err := p.Lookup("Resolve1")
 	if err != nil {
-		panic(err)
+		f1Exists = false
 	}
 
+	f2Exists := true
 	f2, err := p.Lookup("Resolve2")
 	if err != nil {
-		panic(err)
+		f2Exists = false
 	}
 
 	fmt.Println("\n==========\n")
-	result1 := f1.(func(lines []string)(string))(lines)
-	fmt.Println("result 1 : '"+result1+"'")
+	if f1Exists {
+		result1 := f1.(func(lines []string)(string))(lines)
+		fmt.Println("result 1 : '"+result1+"'")
+	} else {
+		fmt.Println("Resolve1 not found")
+	}
 	fmt.Println("\n==========\n")
-	result2 := f2.(func(lines []string)(string))(lines)
-	fmt.Println("result 2 : '"+result2+"'")
+	if f2Exists {
+		result2 := f2.(func(lines []string)(string))(lines)
+		fmt.Println("result 2 : '"+result2+"'")
+	} else {
+		fmt.Println("Resolve2 not found")
+	}
 	fmt.Println("\n==========\n")
 	fmt.Println("End")
 }
