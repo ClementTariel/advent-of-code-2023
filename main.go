@@ -93,6 +93,23 @@ func main() {
 	} else {
 		fmt.Println("$AoCSession env var was not defined")
 	}
+
+	var testLines []string
+	test, err := os.Open(dayName + "/example.txt")
+	if err != nil {
+		fmt.Println("example input not found (Could not find example.txt)")
+	} else {
+		defer test.Close()
+		scanner := bufio.NewScanner(test)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if len(line) > 0 {
+				testLines = append(testLines, line)
+			}
+		}
+		fmt.Printf("%d lines in example\n", len(testLines))
+	}
+
 	file, err := os.Open(dayName + "/input.txt")
 	if err != nil {
 		panic(err)
@@ -106,7 +123,7 @@ func main() {
 			lines = append(lines, line)
 		}
 	}
-	fmt.Printf("%d lines\n", len(lines))
+	fmt.Printf("%d lines in input\n", len(lines))
 	
 	p, err := plugin.Open(dayName+"/"+dayName+".so")
 	if err != nil {
@@ -127,15 +144,29 @@ func main() {
 
 	fmt.Println("\n==========\n")
 	if f1Exists {
+		test1 := ""
+		if len(testLines) > 0 {
+			test1 = f1.(func(lines []string)(string))(testLines)
+			fmt.Printf("example 1 : '%s'\n", test1)
+		} else {
+			fmt.Println("not tested with example")
+		}
 		result1 := f1.(func(lines []string)(string))(lines)
-		fmt.Println("result 1 : '"+result1+"'")
+		fmt.Printf("result 1 : '%s'\n", result1)
 	} else {
 		fmt.Println("Resolve1 not found")
 	}
 	fmt.Println("\n==========\n")
 	if f2Exists {
+		test2 := ""
+		if len(testLines) > 0 {
+			test2 = f2.(func(lines []string)(string))(testLines)
+			fmt.Printf("example 2 : '%s'\n", test2)
+		} else {
+			fmt.Println("not tested with example")
+		}
 		result2 := f2.(func(lines []string)(string))(lines)
-		fmt.Println("result 2 : '"+result2+"'")
+		fmt.Printf("result 2 : '%s'\n", result2)
 	} else {
 		fmt.Println("Resolve2 not found")
 	}
