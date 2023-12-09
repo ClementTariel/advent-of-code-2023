@@ -9,6 +9,7 @@ import (
 	"errors"
 	"bufio"
 	"plugin"
+	"flag"
 )
 
 func getDays() ([]string, error) {
@@ -33,7 +34,7 @@ func getDays() ([]string, error) {
 	return days, nil
 }
 
-func getLastDay() (int, string, error){
+func getDay(dayFlag int) (int, string, error){
 	days, err := getDays()
 	if err != nil {
 		return 0, "", err
@@ -41,44 +42,62 @@ func getLastDay() (int, string, error){
 	max := 0
 	dayName := ""
 	for _, day := range days {
-		if len(day) > 3 && day[0:3] == "day" {	
-			num, _ := strconv.Atoi(day[3:])
-			if num > max {
+		num, err := strconv.Atoi(day[3:])
+		if err != nil {
+			continue
+		}
+		if num > 0 && num <= 25 {
+			if num > max || num == dayFlag {
 				max = num
 				dayName = day
 			}
+			if num == dayFlag {
+				break
+			}
 		}
 	}
+	if max == 0 {
+		panic("no valid day found")
+	}
+
 	return max, dayName, nil
 }
 
+var dayFlagPtr = flag.Int("day", 0, "Day selected")
+var dryRunFlagPtr = flag.Bool("dry-run", false, "Run only with example.txt")
+
 func main() {
+	flag.Parse()
+	dayFlag := *dayFlagPtr
+	dryRunFlag := *dryRunFlagPtr
+
 	fmt.Println("Start")
 
-
-	lastDay, dayName, _ := getLastDay()
+	lastDay, dayName, _ := getDay(dayFlag)
 	fmt.Printf("day %d\n",lastDay)
 	fmt.Printf("file name : %s\n",dayName)
-	
+
 	sessionToken := ""
 	sessionFile, err := os.Open("session.txt")
 	if err != nil {
-		panic(err)
-	}
-	defer sessionFile.Close()
-	sessionScanner := bufio.NewScanner(sessionFile)
-	for sessionScanner.Scan() {
-		line := sessionScanner.Text()
-		if len(line) > 0 {
-			sessionToken = line
+		fmt.Println("session.txt not found")
+	} else {
+		sessionScanner := bufio.NewScanner(sessionFile)
+		for sessionScanner.Scan() {
+			line := sessionScanner.Text()
+			if len(line) > 0 {
+				sessionToken = line
+			}
 		}
 	}
-	
-	if len(sessionToken) > 0 {
+	defer sessionFile.Close()
+	if !dryRunFlag {
 		if _, err := os.Stat(dayName + "/input.txt"); errors.Is(err, os.ErrNotExist) {
-		
+			if len(sessionToken) == 0 {
+				panic("input.txt not found, session token not found")
+			}
 			cmd := exec.Command("curl","https://adventofcode.com/2023/day/"+strconv.Itoa(lastDay)+"/input", "--cookie", "session="+sessionToken, "-o", dayName+"/input.txt")
-			fmt.Printf("%s\n", cmd.String())
+			fmt.Printf("%ssession=<token of size %d> %s\n", strings.Split(cmd.String(),"session=")[0], len(sessionToken), strings.Join(strings.Split(strings.Split(cmd.String(),"session=")[1], " ")[1:], " "))
 			stdout, err := cmd.Output()
 
 			if err != nil {
@@ -86,12 +105,11 @@ func main() {
 				return
 			}
 			fmt.Printf("%s\n", stdout)
-		
 		} else {
 			fmt.Println("Input already downloaded")
 		}
 	} else {
-		fmt.Println("$AoCSession env var was not defined")
+		fmt.Println("dry-run, ignore input.txt")
 	}
 
 	var testLines []string
@@ -110,26 +128,27 @@ func main() {
 		fmt.Printf("%d lines in example\n", len(testLines))
 	}
 
-	file, err := os.Open(dayName + "/input.txt")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
 	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if len(line) > 0 {
-			lines = append(lines, line)
+	if !dryRunFlag {
+		file, err := os.Open(dayName + "/input.txt")
+		if err != nil {
+			panic(err)
 		}
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if len(line) > 0 {
+				lines = append(lines, line)
+			}
+		}
+		fmt.Printf("%d lines in input\n", len(lines))
 	}
-	fmt.Printf("%d lines in input\n", len(lines))
-	
 	p, err := plugin.Open(dayName+"/"+dayName+".so")
 	if err != nil {
 		panic(err)
 	}
-	
+
 	f1Exists := true
 	f1, err := p.Lookup("Resolve1")
 	if err != nil {
@@ -151,8 +170,12 @@ func main() {
 		} else {
 			fmt.Println("not tested with example")
 		}
-		result1 := f1.(func(lines []string)(string))(lines)
-		fmt.Printf("result 1 : '%s'\n", result1)
+		if dryRunFlag {
+			fmt.Println("dry-run, real input not used")
+		} else {
+			result1 := f1.(func(lines []string)(string))(lines)
+			fmt.Printf("result 1 : '%s'\n", result1)
+		}
 	} else {
 		fmt.Println("Resolve1 not found")
 	}
@@ -165,8 +188,12 @@ func main() {
 		} else {
 			fmt.Println("not tested with example")
 		}
-		result2 := f2.(func(lines []string)(string))(lines)
-		fmt.Printf("result 2 : '%s'\n", result2)
+		if dryRunFlag {
+			fmt.Println("dry-run, real input not used")
+		} else {
+			result2 := f2.(func(lines []string)(string))(lines)
+			fmt.Printf("result 2 : '%s'\n", result2)
+		}
 	} else {
 		fmt.Println("Resolve2 not found")
 	}
