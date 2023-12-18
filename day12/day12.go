@@ -37,7 +37,7 @@ func GreedyCount(
 		return 0
 	}
 	if len(springs) == 0 {
-		if len(counts) == 0 || (len(counts) == 1 && counts[0] == currentCount)) {
+		if len(counts) == 0 || (len(counts) == 1 && counts[0] == currentCount) {
 			return 1
 		}
 		return 0
