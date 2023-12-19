@@ -13,11 +13,9 @@ func Choose(n int, k int) (int) {
 	if k < 0 {
 		return 0
 	}
-	for i := 0; i < k; i++ {
-		res *= n-i
-	}
-	for i := 0; i < k; i++ {
-		res /= (i+1)
+	for i := 1; i <= k; i++ {
+		res *= n-(k-i)
+		res /= i
 	}
 	return res
 }
