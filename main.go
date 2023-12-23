@@ -121,9 +121,7 @@ func main() {
 		scanner := bufio.NewScanner(test)
 		for scanner.Scan() {
 			line := scanner.Text()
-			if len(line) > 0 {
-				testLines = append(testLines, line)
-			}
+			testLines = append(testLines, line)
 		}
 		fmt.Printf("%d lines in example\n", len(testLines))
 	}
@@ -138,9 +136,7 @@ func main() {
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			line := scanner.Text()
-			if len(line) > 0 {
-				lines = append(lines, line)
-			}
+			lines = append(lines, line)
 		}
 		fmt.Printf("%d lines in input\n", len(lines))
 	}
