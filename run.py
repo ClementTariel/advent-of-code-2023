@@ -25,7 +25,7 @@ for arg in sys.argv[1:]:
                 dayFlag = day
         except Error as err:
             print(err)
-    elif arg == "--dry-run":
+    elif arg == "--dry-run" or arg == "--no-part-1":
         flags.append(arg)
 print(flags)
 

@@ -18,7 +18,7 @@ func getDays() ([]string, error) {
 		return nil, err
 	}
 	defer dir.Close()
-	
+
 	files, err := dir.Readdir(-1)
 	if err != nil {
 		return nil, err
@@ -65,11 +65,13 @@ func getDay(dayFlag int) (int, string, error){
 
 var dayFlagPtr = flag.Int("day", 0, "Day selected")
 var dryRunFlagPtr = flag.Bool("dry-run", false, "Run only with example.txt")
+var noPart1FlagPtr = flag.Bool("no-part-1", false, "Do not run the part 1 (run only the part 2)")
 
 func main() {
 	flag.Parse()
 	dayFlag := *dayFlagPtr
 	dryRunFlag := *dryRunFlagPtr
+	noPart1Flag := *noPart1FlagPtr
 
 	fmt.Println("Start")
 
@@ -158,7 +160,7 @@ func main() {
 	}
 
 	fmt.Println("\n==========\n")
-	if f1Exists {
+	if f1Exists && !noPart1Flag {
 		test1 := ""
 		if len(testLines) > 0 {
 			test1 = f1.(func(lines []string)(string))(testLines)
@@ -172,6 +174,8 @@ func main() {
 			result1 := f1.(func(lines []string)(string))(lines)
 			fmt.Printf("result 1 : '%s'\n", result1)
 		}
+	} else if noPart1Flag {
+		fmt.Println("skip part 1")
 	} else {
 		fmt.Println("Resolve1 not found")
 	}
