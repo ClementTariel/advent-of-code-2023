@@ -91,9 +91,11 @@ func Resolve2(lines []string) (string) {
 			}
 		}
 	}
-	nexts := [][5]int{[5]int{0, 0, 0, 0, 0}, [5]int{0, 0, 3, 0, 0}}
-	seen[([4]int)(nexts[0][:4])] = 0
-	seen[([4]int)(nexts[1][:4])] = 0
+	startHeatI, _ := strconv.Atoi(string(lines[1][0]))
+	startHeatJ, _ := strconv.Atoi(string(lines[0][1]))
+	nexts := [][5]int{[5]int{0, 1, 0, 0, startHeatJ}, [5]int{1, 0, 3, 0, startHeatI}}
+	seen[([4]int)(nexts[0][:4])] = startHeatJ
+	seen[([4]int)(nexts[1][:4])] = startHeatI
 	for len(nexts) != 0 {
 		next := ([4]int)(nexts[0][:4])
 		totalHeatLoss := nexts[0][4]
